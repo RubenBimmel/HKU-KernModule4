@@ -23,7 +23,7 @@ public class Square : MonoBehaviour {
 
 		// Move if this square is vacant
 		if (!pawn) {
-			pawn.Move (this);
+			Pawn.selectedPawn.Move (this);
 			pawn = Pawn.selectedPawn;
 			return;
 		}
@@ -49,17 +49,43 @@ public class Square : MonoBehaviour {
 	}
 
 	private void Update() {
-		if (GameManager.localState == GameManager.PlayerState.waiting ||
-			GameManager.localState == GameManager.PlayerState.active) {
-			enabled = false;
-		} else if (GameManager.localState == GameManager.PlayerState.placingPawn && pawn) {
-			enabled = false;
-		} else if (GameManager.localState == GameManager.PlayerState.movingPawn && pawn.team == Pawn.selectedPawn.team) {
-			enabled = false;
-		} else {
-			enabled = true;
+		switch (GameManager.gameState) {
+		case GameManager.GameState.setup:
+			switch (GameManager.localState) {
+			case GameManager.PlayerState.waiting:
+				enabled = false;
+				break;
+			case GameManager.PlayerState.active:
+				enabled = false;
+				break;
+			case GameManager.PlayerState.placingPawn:
+				if (pawn) {
+					enabled = false;
+				} else {
+					enabled = true;
+				}
+				break;
+			}
+			break;
+		case GameManager.GameState.battle:
+			switch (GameManager.localState) {
+			case GameManager.PlayerState.waiting:
+				enabled = false;
+				break;
+			case GameManager.PlayerState.active:
+				enabled = pawn;
+				break;
+			case GameManager.PlayerState.movingPawn:
+				if ((pawn && pawn.team == Pawn.selectedPawn.team) ||
+					GameBoard.GetDistance(this, Pawn.selectedPawn.square) > 2) {
+					enabled = false;
+				} else {
+					enabled = true;
+				}
+				break;
+			}
+			break;
 		}
-
 		if (enabled) {
 			if (mouseOver) {
 				renderer.material = Resources.Load<Material> ("Materials/SelectedSquare");
@@ -78,6 +104,14 @@ public class Square : MonoBehaviour {
 			case GameManager.PlayerState.placingPawn:
 				AddPawn ("Pawn");
 				break;
+			case GameManager.PlayerState.active:
+				if (GameManager.gameState == GameManager.GameState.battle) {
+					if (enabled) {
+						Pawn.Select (pawn);
+						GameManager.SetPlayerState (GameManager.PlayerState.movingPawn);
+					}
+				}
+				break;
 			case GameManager.PlayerState.movingPawn:
 				if (Pawn.selectedPawn) {
 					ExecuteMove ();
@@ -88,9 +122,7 @@ public class Square : MonoBehaviour {
 	}
 
 	private void OnMouseOver () {
-		if (GameManager.localState == GameManager.PlayerState.placingPawn) {
-			mouseOver = true;
-		}
+		mouseOver = true;
 	}
 
 	private void OnMouseExit () {

@@ -8,8 +8,21 @@ public class Pawn : MonoBehaviour {
 
 	public bool isAlive = true;
 	public int team;
+	public Square square;
 
-	private Square square;
+	private MeshRenderer renderer;
+
+	private void Awake () {
+		renderer = GetComponentInChildren<MeshRenderer> ();
+	}
+
+	private void Update () {
+		if (selectedPawn == this) {
+			renderer.material = Resources.Load<Material> ("Materials/SelectedSquare");
+		} else {
+			renderer.material = Resources.Load<Material> ("Materials/ActiveSquare");
+		}
+	}
 
 	// Move this pawn to a new square
 	public void Move (Square targetSquare) {
@@ -33,5 +46,9 @@ public class Pawn : MonoBehaviour {
 	// Select a pawn
 	public static void Select (Pawn pawn) {
 		selectedPawn = pawn;
+	}
+
+	public static void Deselect () {
+		selectedPawn = null;
 	}
 }

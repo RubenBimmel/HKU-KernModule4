@@ -40,4 +40,25 @@ public class GameBoard : MonoBehaviour {
 		}
 		return squares [x + y * size[0]];
 	}
+
+	public static int[] GetCoordinates (Square s) {
+		for (int i = 0; i < squares.Length; i++) {
+			if (squares [i] == s) {
+				// Square s is at index i
+				int x = i % size [0];
+				int y = (i - x) / size [0];
+				return new int[] { x, y };
+			}
+		}
+		return null;
+	}
+
+	public static int GetDistance (Square s1, Square s2) {
+		int[] c1 = GetCoordinates (s1);
+		int[] c2 = GetCoordinates (s2);
+		if (c1 != null && c2 != null) {
+			return Mathf.Max (Mathf.Abs(c1 [0] - c2 [0]), Mathf.Abs(c1 [1] - c2 [1]));
+		}
+		return int.MaxValue;
+	}
 }

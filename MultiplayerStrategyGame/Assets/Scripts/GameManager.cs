@@ -35,14 +35,26 @@ public class GameManager : MonoBehaviour {
 				}
 			} else {
 				gameState = GameState.battle;
+				localState = PlayerState.active;
 			}
 			break;
 		case GameState.battle:
+			if (localState != PlayerState.waiting) {
+				if (Input.GetButtonDown ("Cancel")) {
+					localState = PlayerState.active;
+					Pawn.Deselect ();
+				}
+			}
 			break;
 		}
 	}
 
+	public static void SetPlayerState (PlayerState state) {
+		localState = state;
+	}
+
+	// Used for UnityEvents
 	public void SetPlayerState (string state) {
-		localState = (PlayerState) System.Enum.Parse(typeof(PlayerState), state);
+		SetPlayerState((PlayerState) System.Enum.Parse(typeof(PlayerState), state));
 	}
 }
