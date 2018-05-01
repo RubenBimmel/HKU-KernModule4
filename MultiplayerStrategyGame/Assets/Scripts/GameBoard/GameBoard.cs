@@ -17,7 +17,7 @@ public class GameBoard : MonoBehaviour {
 		size = new int[] {width, length};
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < length; y++) {
-				squares [x + y * width] = Instantiate (Resources.Load<Square> ("Square"), transform);
+				squares [x + y * width] = Instantiate (Resources.Load<Square> ("Prefabs/Square"), transform);
 				squares [x + y * width].transform.localPosition = new Vector3 (x + .5f, 0, y + .5f);
 				squares [x + y * width].name = "Square (" + x + ", " + y + ")";
 			}

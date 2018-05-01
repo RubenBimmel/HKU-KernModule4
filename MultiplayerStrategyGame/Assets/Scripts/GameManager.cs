@@ -16,8 +16,8 @@ public class GameManager : MonoBehaviour {
 		movingPawn
 	}
 		
-	public GameState gameState;
-	public PlayerState localState;
+	public static GameState gameState;
+	public static PlayerState localState;
 
 	// Use this for initialization
 	void Start () {

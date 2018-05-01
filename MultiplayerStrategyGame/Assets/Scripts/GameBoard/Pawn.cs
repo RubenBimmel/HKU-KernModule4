@@ -13,7 +13,9 @@ public class Pawn : MonoBehaviour {
 
 	// Move this pawn to a new square
 	public void Move (Square targetSquare) {
-		square.pawn = null;
+		if (square) {
+			square.pawn = null;
+		}
 		square = targetSquare;
 		transform.parent = targetSquare.transform;
 		transform.localPosition = Vector3.zero;
