@@ -6,6 +6,8 @@ TextureImporter:
   fileIDToRecycleName:
     21300000: Buttons_0
     21300002: Buttons_1
+    21300004: Buttons_2
+    21300006: Buttons_3
   externalObjects: {}
   serializedVersion: 4
   mipmaps:
@@ -117,7 +119,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 90
         width: 320.5
         height: 90
       alignment: 0
@@ -128,6 +130,34 @@ TextureImporter:
       tessellationDetail: 0
     - serializedVersion: 2
       name: Buttons_1
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 90
+        width: 320.5
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Buttons_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 320.5
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Buttons_3
       rect:
         serializedVersion: 2
         x: 320
