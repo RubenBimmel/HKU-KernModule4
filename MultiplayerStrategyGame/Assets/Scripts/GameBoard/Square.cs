@@ -1,131 +1,107 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class Square : MonoBehaviour {
 
-	public Pawn pawn;
-	private bool enabled;
+	public List<Pawn> pawns;
+	public bool active;
 	private bool mouseOver;
-	private MeshRenderer renderer;
+	private MeshRenderer meshRenderer;
 
 	private void Awake() {
-		renderer = GetComponent<MeshRenderer> ();
+        meshRenderer = GetComponent<MeshRenderer> ();
 	}
 
-	// Gets called when a player moves a pawn to this square
-	public void ExecuteMove () {
-		
-		if (!Pawn.selectedPawn) {
-			Debug.LogWarning ("Trying to do a move without a selected pawn");
-			return;
-		}
+    // Returns the pawn belonging to the local player
+    public Pawn GetPlayerPawn() {
+        foreach (Pawn p in pawns) {
+            if (p.team == Player.localPlayer.playerID) {
+                return p;
+            }
+        }
+        return null;
+    }
 
-		// Move if this square is vacant
-		if (!pawn) {
-			Pawn.selectedPawn.Move (this);
-			pawn = Pawn.selectedPawn;
-			return;
-		}
+    // Update position of pawns on this square
+    public void UpdatePawnPositions () {
+        if (pawns.Count == 1) {
+            pawns[0].transform.localPosition = Vector3.zero;
+        }
+        else if (pawns.Count == 2) {
+            if (pawns[0].team == 0) {
+                pawns[0].transform.localPosition = Vector3.back * .15f * pawns[0].transform.localScale.z;
+                pawns[1].transform.localPosition = Vector3.forward * .15f * pawns[0].transform.localScale.z;
+            }
+            else {
+                pawns[0].transform.localPosition = Vector3.forward * .15f * pawns[0].transform.localScale.z;
+                pawns[1].transform.localPosition = Vector3.back * .15f * pawns[0].transform.localScale.z;
+            }
+        }
+    }
 
-		// Attack if this square is occupied by another player
-		if (pawn.team != Pawn.selectedPawn.team) {
-			Pawn.selectedPawn.Attack (pawn);
-			if (!pawn.isAlive) {
-				pawn.Move (this);
-				pawn = Pawn.selectedPawn;
-			}
-			return;
-		}
-
-		Debug.LogError ("Impossible move to square occupied by same player");
+    // Called every frame
+    private void Update() {
+        if (Player.localPlayer) {
+                switch (Player.localPlayer.state) {
+                case Player.PlayerState.waiting:
+                    active = false;
+                    break;
+                case Player.PlayerState.setup:
+                    active = false;
+                    break;
+                case Player.PlayerState.placingPawn:
+                    if (Player.localPlayer.playerID == 0) {
+                        active = pawns.Count == 0 && GameBoard.GetCoordinates(this)[1] < GameBoard.setupAreaSize;
+                    } else {
+                        active = pawns.Count == 0 && GameBoard.GetCoordinates(this)[1] >= GameBoard.GetSize()[1] - GameBoard.setupAreaSize;
+                    }
+                    break;
+                case Player.PlayerState.removingPawn:
+                    active = GetPlayerPawn();
+                    break;
+                case Player.PlayerState.battle:
+                    active = GetPlayerPawn();
+                    break;
+                case Player.PlayerState.movingPawn:
+                    if (!Pawn.selectedPawn) {
+                        active = false;
+                    } else if (GetPlayerPawn()) {
+                        active = false;
+                    } else if (GameBoard.GetDistance(this, Pawn.selectedPawn.square) > Pawn.selectedPawn.moveDistance) {
+                        active = false;
+                    } else {
+                        active = true;
+                    }
+                    break;
+            }
+            ApplyMaterial();
+        }
 	}
 
-	public void AddPawn(string type) {
-		if (!pawn) {
-			pawn = Instantiate (Resources.Load<Pawn> ("Prefabs/" + type));
-			pawn.Move (this);
-		}
-	}
+    // Updates the material for visual representation of the squares state, called every frame
+    private void ApplyMaterial () {
+        if (active) {
+            if (mouseOver) {
+                meshRenderer.material = Player.localPlayer.GetColor();
+            }
+            else {
+                meshRenderer.material = Resources.Load<Material>("Materials/ActiveSquare");
+            }
+        }
+        else {
+            meshRenderer.material = Resources.Load<Material>("Materials/DisabledSquare");
+        }
+    }
 
-	private void Update() {
-		switch (GameManager.gameState) {
-		case GameManager.GameState.setup:
-			switch (GameManager.localState) {
-			case GameManager.PlayerState.waiting:
-				enabled = false;
-				break;
-			case GameManager.PlayerState.active:
-				enabled = false;
-				break;
-			case GameManager.PlayerState.placingPawn:
-				if (pawn) {
-					enabled = false;
-				} else {
-					enabled = true;
-				}
-				break;
-			}
-			break;
-		case GameManager.GameState.battle:
-			switch (GameManager.localState) {
-			case GameManager.PlayerState.waiting:
-				enabled = false;
-				break;
-			case GameManager.PlayerState.active:
-				enabled = pawn;
-				break;
-			case GameManager.PlayerState.movingPawn:
-				if ((pawn && pawn.team == Pawn.selectedPawn.team) ||
-					GameBoard.GetDistance(this, Pawn.selectedPawn.square) > 2) {
-					enabled = false;
-				} else {
-					enabled = true;
-				}
-				break;
-			}
-			break;
-		}
-		if (enabled) {
-			if (mouseOver) {
-				renderer.material = Resources.Load<Material> ("Materials/SelectedSquare");
-			} else {
-				renderer.material = Resources.Load<Material> ("Materials/ActiveSquare");
-			}
-		} else {
-			renderer.material = Resources.Load<Material> ("Materials/DisabledSquare");
-		}
-	}
-
-	// Called when the player clicks on this square
-	private void OnMouseDown () {
-		if (enabled) {
-			switch (GameManager.localState) {
-			case GameManager.PlayerState.placingPawn:
-				AddPawn ("Pawn");
-				break;
-			case GameManager.PlayerState.active:
-				if (GameManager.gameState == GameManager.GameState.battle) {
-					if (enabled) {
-						Pawn.Select (pawn);
-						GameManager.SetPlayerState (GameManager.PlayerState.movingPawn);
-					}
-				}
-				break;
-			case GameManager.PlayerState.movingPawn:
-				if (Pawn.selectedPawn) {
-					ExecuteMove ();
-				}
-				break;
-			}
-		}
-	}
-
-	private void OnMouseOver () {
+    // Update mouseover state
+	private void OnMouseEnter () {
 		mouseOver = true;
 	}
 
-	private void OnMouseExit () {
+    // Update mouseover state
+    private void OnMouseExit () {
 		mouseOver = false;
 	}
 }

@@ -23,6 +23,7 @@ public class UIElement : MonoBehaviour {
 
 	private void Awake () {
 		offset = transform.localPosition;
+        Align(UICamera.bounds);
 	}
 
 	// Aligns the camera

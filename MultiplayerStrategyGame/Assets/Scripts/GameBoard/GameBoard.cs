@@ -1,27 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class GameBoard : MonoBehaviour {
 
 	public int width;
 	public int length;
 
+    public static int setupAreaSize = 3;
+
 	private static int[] size;
-	private static Square[] squares;
+	public static Square[] squares;
 
 	// Awake is called on initialization
 	private void Awake () {
-		// initialise the board
-		squares = new Square[width * length];
-		size = new int[] {width, length};
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < length; y++) {
-				squares [x + y * width] = Instantiate (Resources.Load<Square> ("Prefabs/Square"), transform);
-				squares [x + y * width].transform.localPosition = new Vector3 (x + .5f, 0, y + .5f);
-				squares [x + y * width].name = "Square (" + x + ", " + y + ")";
-			}
-		}
+        // initialise the board
+        squares = new Square[width * length];
+        size = new int[] { width, length };
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < length; y++) {
+                    squares[x + y * width] = Instantiate(Resources.Load<Square>("Prefabs/Square"), transform);
+                    squares[x + y * width].transform.localPosition = new Vector3(x + .5f, 0, y + .5f);
+                    squares[x + y * width].name = "Square (" + x + ", " + y + ")";
+                }
+            }
 	}
 
 	// Draw board outline so that it is visible inside the editor
@@ -41,18 +44,33 @@ public class GameBoard : MonoBehaviour {
 		return squares [x + y * size[0]];
 	}
 
-	public static int[] GetCoordinates (Square s) {
-		for (int i = 0; i < squares.Length; i++) {
-			if (squares [i] == s) {
-				// Square s is at index i
-				int x = i % size [0];
-				int y = (i - x) / size [0];
-				return new int[] { x, y };
-			}
-		}
+    // Get coordinates for a given square
+    public static int[] GetCoordinates (Square s) {
+        int i = GetIndex(s);
+        if (i >= 0) {
+            int x = i % size[0];
+            int y = (i - x) / size[0];
+            return new int[] { x, y };
+        }
 		return null;
 	}
 
+    // Get size of the board
+    public static int[] GetSize () {
+        return size;
+    }
+
+    // Get index of a given square
+    public static int GetIndex (Square s) {
+        for (int i = 0; i < squares.Length; i++) {
+            if (squares[i] == s) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // Get distance between squares
 	public static int GetDistance (Square s1, Square s2) {
 		int[] c1 = GetCoordinates (s1);
 		int[] c2 = GetCoordinates (s2);
@@ -61,4 +79,37 @@ public class GameBoard : MonoBehaviour {
 		}
 		return int.MaxValue;
 	}
+
+    // Return an array of all neighbouring tiles
+    public static Square[] GetNeighbours (Square s) {
+        List<Square> neighbours = new List<Square>();
+        int[] coordinates = GetCoordinates(s);
+
+        Square neighbour;
+        neighbour = GetSquare(coordinates[0] + 1, coordinates[1] - 1);
+        if (neighbour) neighbours.Add(neighbour);
+
+        neighbour = GetSquare(coordinates[0] + 1, coordinates[1]);
+        if (neighbour) neighbours.Add(neighbour);
+
+        neighbour = GetSquare(coordinates[0] + 1, coordinates[1] + 1);
+        if (neighbour) neighbours.Add(neighbour);
+
+        neighbour = GetSquare(coordinates[0], coordinates[1]);
+        if (neighbour) neighbours.Add(neighbour);
+
+        neighbour = GetSquare(coordinates[0], coordinates[1]);
+        if (neighbour) neighbours.Add(neighbour);
+
+        neighbour = GetSquare(coordinates[0] - 1, coordinates[1] - 1);
+        if (neighbour) neighbours.Add(neighbour);
+
+        neighbour = GetSquare(coordinates[0] - 1, coordinates[1]);
+        if (neighbour) neighbours.Add(neighbour);
+
+        neighbour = GetSquare(coordinates[0] - 1, coordinates[1] + 1);
+        if (neighbour) neighbours.Add(neighbour);
+
+        return neighbours.ToArray();
+    }
 }

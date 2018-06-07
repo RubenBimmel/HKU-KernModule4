@@ -1,60 +1,63 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class GameManager : MonoBehaviour {
-
-	public enum GameState {
-		setup,
-		battle
-	}
-
-	public enum PlayerState {
-		waiting,
-		active,
-		placingPawn,
-		movingPawn
-	}
-		
-	public static GameState gameState;
-	public static PlayerState localState;
+public class GameManager : NetworkBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		localState = PlayerState.active;
-		gameState = GameState.setup;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		switch (gameState) {
-		case GameState.setup:
-			if (localState != PlayerState.waiting) {
-				if (Input.GetButtonDown ("Cancel")) {
-					localState = PlayerState.active;
-				}
-			} else {
-				gameState = GameState.battle;
-				localState = PlayerState.active;
-			}
-			break;
-		case GameState.battle:
-			if (localState != PlayerState.waiting) {
-				if (Input.GetButtonDown ("Cancel")) {
-					localState = PlayerState.active;
-					Pawn.Deselect ();
-				}
-			}
-			break;
-		}
+        if (isServer) {
+            CheckPlayerStates();
+        }
 	}
 
-	public static void SetPlayerState (PlayerState state) {
-		localState = state;
-	}
+    // Called when a game is finished
+    public static void GameOver (Player winner) {
 
-	// Used for UnityEvents
-	public void SetPlayerState (string state) {
-		SetPlayerState((PlayerState) System.Enum.Parse(typeof(PlayerState), state));
-	}
+    }
+
+    // Check if all players are ready for the next turn
+    private void CheckPlayerStates () {
+        bool playersAreWaiting = true;
+        foreach (Player player in Player.ActivePlayers) {
+            if (player.state != Player.PlayerState.waiting) {
+                playersAreWaiting = false;
+            }
+        }
+
+        if (playersAreWaiting) {
+            UpdateGameState();
+        }
+    }
+
+    // Update and prepare for next turn
+    private void UpdateGameState () {
+        RpcSetLocalPlayerState((int)Player.PlayerState.updating);
+        RpcExecuteAllPlayerMoves();
+
+        foreach (Square square in GameBoard.squares) {
+            if (square.pawns.Count == 2) {
+                Pawn.Attack(square.pawns[0], square.pawns[1]);
+            }
+        }
+
+        RpcSetLocalPlayerState((int)Player.PlayerState.battle);
+    }
+
+    [ClientRpc]
+    // Update local player states
+    private void RpcSetLocalPlayerState (int state) {
+        Player.localPlayer.CmdSetState((Player.PlayerState)state);
+    }
+
+    [ClientRpc]
+    // Receive all player moves
+    private void RpcExecuteAllPlayerMoves() {
+        Player.localPlayer.ExecuteAllMoves();
+    }
 }
