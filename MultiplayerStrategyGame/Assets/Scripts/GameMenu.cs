@@ -12,6 +12,8 @@ public class GameMenu : MonoBehaviour {
     public GameObject GameOverUI;
     private AutoLobbyManager alm;
 
+    private static string session;
+
     // Called on initialisation
     private void Start() {
         alm = (AutoLobbyManager)UnityEngine.Networking.NetworkManager.singleton;
@@ -66,19 +68,20 @@ public class GameMenu : MonoBehaviour {
 
     IEnumerator PostPlayerScore(int score) {
         //First we create a form to add information to
-        List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
+        WWWForm form = new WWWForm();
+        form.AddField("gameid", 6);
+        form.AddField("score", score);
 
-        //These two pieces are pretty standard (but will depend on your php code!)
-        //	First is the sessionID we probably received during our login process, and we send it with each request so php knows who's talking
-        //	Then we also add a "request", which tells the php script what we're trying to do
-        //		(You could just have different php scripts, and use a different URL for each type of request)
-        //formData.Add(new MultipartFormDataSection("sessionID=" + sessionID + "&request=" + request));
+        //We're using Post by default, because we're always sending sessionID
+        string url = "http://studenthome.hku.nl/~ruben.bimmel/HKU/jaar2dev/Kernmodule4/database/posttosession.php";
 
-        //This is a handy way you can add arguments (in pairs of 2, "&name=value") to the webrequest
-        formData.Add(new MultipartFormDataSection("&gameid=6&score=" + score));
+        //Pass the current session id if there is one active
+        if (session != null) {
+            url += "?sessionid=" + session;
+        }
 
-        //We're using Post by default, because we're always sending sessionID and request
-        UnityWebRequest www = UnityWebRequest.Post("http://studenthome.hku.nl/~ruben.bimmel/HKU/jaar2dev/Kernmodule4/database/confirmscore.php", formData);
+        //Post game data
+        UnityWebRequest www = UnityWebRequest.Post(url, form);
 
         //This blocks
         yield return www.SendWebRequest();
@@ -87,14 +90,12 @@ public class GameMenu : MonoBehaviour {
             Debug.Log(www.error);
         }
         else {
-            Application.OpenURL("http://studenthome.hku.nl/~ruben.bimmel/HKU/jaar2dev/Kernmodule4/database/confirmscore.php");
+            //Save session id
+            session = www.downloadHandler.text;
+
+            //Go to confirmation page
+            Application.OpenURL("http://studenthome.hku.nl/~ruben.bimmel/HKU/jaar2dev/Kernmodule4/database/confirmfromgame.php?sessionid=" + session);
         }
-        /*else {
-            //If we're expecting something, we can add a 
-            if (callback != null) {
-                callback(www.downloadHandler.text);
-            }
-        }*/
 
         yield return null;
     }

@@ -301,6 +301,7 @@ c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.Spa
 75cd0c6c744b9733ef29aa6c59ece2b1 Assembly-CSharp.dll:TMPro.Examples.VertexShakeB
 6826e26f7cc718f870001971f13e79c7 Assembly-CSharp.dll:TMPro.TMP_TextEventHandler
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:TMPro.Examples.VertexColorCycler
+0ed942a4ef26771d08a77579e57fc253 Assembly-CSharp.dll:.ShaderTest
 fdeb192d507f8a7709053fb47b81c69d Assembly-CSharp.dll:.Pawn
 60c47c8a754ffa0681672db801f72fa7 Assembly-CSharp.dll:.UIElement
 020550babdb991365f61c5bffe1f4f52 Assembly-CSharp.dll:TMPro.Examples.TextMeshSpawner
