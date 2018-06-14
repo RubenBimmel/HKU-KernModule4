@@ -7,7 +7,7 @@ public class GameManager : NetworkBehaviour {
 
     public static GameManager instance;
 
-    public float maxTurnTime = 30f;
+    public float maxTurnTime = 60f;
 
     private int[] playerScores;
     private int turnCount;
@@ -113,6 +113,7 @@ public class GameManager : NetworkBehaviour {
 
         turnCount++;
         turnTimer = 0;
+        maxTurnTime = 30f; // Max turn time changes in battle state
         RpcSetLocalPlayerState((int)Player.PlayerState.battle);
     }
 

@@ -6,12 +6,18 @@ using UnityEngine.Networking;
 public class Square : MonoBehaviour {
 
 	public List<Pawn> pawns;
+    [HideInInspector]
 	public bool active;
+
 	private bool mouseOver;
-	private MeshRenderer meshRenderer;
+    private SquareShader shader;
+	//private MeshRenderer meshRenderer;
 
 	private void Awake() {
-        meshRenderer = GetComponent<MeshRenderer> ();
+        shader = GetComponent<SquareShader> ();
+        if (Player.localPlayer) {
+            shader.selectedColor = Player.localPlayer.GetColor();
+        }
 	}
 
     // Returns the pawn belonging to the local player
@@ -82,16 +88,27 @@ public class Square : MonoBehaviour {
 
     // Updates the material for visual representation of the squares state, called every frame
     private void ApplyMaterial () {
-        if (active) {
+        if (Pawn.selectedPawn && Pawn.selectedPawn.square == this) {
+            shader.selected = true;
+            shader.targetEmission = 0;
+            shader.targetSaturation = 1;
+        }
+        else if (active) {
             if (mouseOver) {
-                meshRenderer.material = Player.localPlayer.GetColor();
+                shader.selected = false;
+                shader.targetEmission = .5f;
+                shader.targetSaturation = 1;
             }
             else {
-                meshRenderer.material = Resources.Load<Material>("Materials/ActiveSquare");
+                shader.selected = false;
+                shader.targetEmission = 0;
+                shader.targetSaturation = 1;
             }
         }
         else {
-            meshRenderer.material = Resources.Load<Material>("Materials/DisabledSquare");
+            shader.selected = false;
+            shader.targetEmission = 0;
+            shader.targetSaturation = 0;
         }
     }
 

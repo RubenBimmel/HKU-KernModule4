@@ -30,7 +30,7 @@ public class Pawn : NetworkBehaviour {
     public void RpcInitialise (int playerID, int squareIndex) {
         team = playerID;
         foreach (MeshRenderer mesh in GetComponentsInChildren<MeshRenderer>()) {
-            mesh.material = Player.ActivePlayers[playerID].GetColor();
+            mesh.material = Player.ActivePlayers[playerID].GetMaterial();
         }
         Move(GameBoard.squares[squareIndex]);
     }

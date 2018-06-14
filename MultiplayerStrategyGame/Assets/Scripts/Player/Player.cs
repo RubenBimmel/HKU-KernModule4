@@ -114,8 +114,27 @@ public class Player : NetworkBehaviour {
     }
 
     // Return the players color as a material
-    public Material GetColor() {
+    public Material GetMaterial() {
         return Resources.Load<Material>("Materials/Player_" + color.ToString());
+    }
+
+    // Return the players color
+    public Color GetColor() {
+        switch (color) {
+            case PlayerColor.Blue:
+                return new Color(0, 0.5f, 0.85f);
+            case PlayerColor.Green:
+                return new Color(0, 0.55f, 0.3f);
+            case PlayerColor.Indigo:
+                return new Color(0.05f, 0, 0.5f);
+            case PlayerColor.Orange:
+                return new Color(1, 0.55f, 0);
+            case PlayerColor.Pink:
+                return new Color(1, 0.3f, 0.6f);
+            case PlayerColor.Red:
+                return new Color(0.95f, 0, 0.05f);
+        }
+        return Color.white;
     }
 
     // Execute all moves

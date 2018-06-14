@@ -10,6 +10,10 @@ public class GameMenu : MonoBehaviour {
     public GameObject SetupUI;
     public GameObject MainUI;
     public GameObject GameOverUI;
+
+    public GameObject SetupCollider;
+    public GameObject PawnCollider;
+
     private AutoLobbyManager alm;
 
     private static string session;
@@ -17,6 +21,21 @@ public class GameMenu : MonoBehaviour {
     // Called on initialisation
     private void Start() {
         alm = (AutoLobbyManager)UnityEngine.Networking.NetworkManager.singleton;
+    }
+
+    // Called every frame
+    private void Update() {
+        UpdateColliders();
+    }
+
+    // Update colliders to prevent collision detection in scene while pressing on menu buttons
+    private void UpdateColliders() {
+        if (Player.localPlayer) {
+            PawnCollider.SetActive(Player.localPlayer.state == Player.PlayerState.placingPawn);
+            SetupCollider.SetActive(Player.localPlayer.state == Player.PlayerState.setup ||
+                Player.localPlayer.state == Player.PlayerState.placingPawn ||
+                Player.localPlayer.state == Player.PlayerState.movingPawn);
+        }
     }
 
     // Update player state
