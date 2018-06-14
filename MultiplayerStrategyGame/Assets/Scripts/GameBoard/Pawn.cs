@@ -9,10 +9,11 @@ public class Pawn : NetworkBehaviour {
 
     public int moveDistance;
     public int strength;
-    public int amount;
     public int boostToAllPawns;
     public int boostToSamePawns;
     public bool gameOverAtKill;
+    public int amount;
+    public int points;
 
     [HideInInspector]
 	public bool isAlive = true;
@@ -37,7 +38,7 @@ public class Pawn : NetworkBehaviour {
     // Kill this pawn
     public void Kill() {
         if (gameOverAtKill) {
-            GameManager.GameOver(Player.ActivePlayers[team]);
+            GameManager.instance.GameOver(Player.ActivePlayers[1 - team]);
         }
         RpcDestroy();
     }
@@ -103,7 +104,7 @@ public class Pawn : NetworkBehaviour {
         List<Pawn> neighbours = new List<Pawn>();
         foreach (Square s in GameBoard.GetNeighbours(square)) {
             foreach (Pawn p in s.pawns) {
-                if (p.team == Player.localPlayer.playerID) {
+                if (p.team == team) {
                     neighbours.Add(p);
                 }
             }
@@ -125,10 +126,13 @@ public class Pawn : NetworkBehaviour {
 
 	// Attack another pawn
 	public static void Attack (Pawn p1, Pawn p2) {
+        Debug.Log("P" + p1.team + ": " + p1.GetStrength() + " VS P" + p2.team + ": " + p2.GetStrength());
         if (p1.GetStrength() < p2.GetStrength()) {
+            GameManager.instance.AddScore(p2.team, p1.points);
             p1.Kill();
         }
         else if (p2.GetStrength() < p1.GetStrength()) {
+            GameManager.instance.AddScore(p1.team, p2.points);
             p2.Kill();
         }
         else {

@@ -30,6 +30,10 @@ public class Player : NetworkBehaviour {
     public static Player localPlayer;
     public static List<Player> ActivePlayers = new List<Player>();
     public int playerID { get { return ActivePlayers.IndexOf(this); } }
+    public bool spawnAllPawns { get { return spawnedPawns.Count == 30; } }
+
+    [HideInInspector]
+    public int score;
 
     private Transform cam;
     private int movementScreenBorderSize = 20;

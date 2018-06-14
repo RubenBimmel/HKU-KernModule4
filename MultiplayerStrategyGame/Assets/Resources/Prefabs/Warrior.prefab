@@ -201,9 +201,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveDistance: 1
   strength: 1
-  amount: 15
   boostToAllPawns: 0
   boostToSamePawns: 1
+  gameOverAtKill: 0
+  amount: 15
+  points: 5
   isAlive: 1
   team: 0
   square: {fileID: 0}

@@ -95,10 +95,10 @@ public class GameBoard : MonoBehaviour {
         neighbour = GetSquare(coordinates[0] + 1, coordinates[1] + 1);
         if (neighbour) neighbours.Add(neighbour);
 
-        neighbour = GetSquare(coordinates[0], coordinates[1]);
+        neighbour = GetSquare(coordinates[0], coordinates[1] - 1);
         if (neighbour) neighbours.Add(neighbour);
 
-        neighbour = GetSquare(coordinates[0], coordinates[1]);
+        neighbour = GetSquare(coordinates[0], coordinates[1] + 1);
         if (neighbour) neighbours.Add(neighbour);
 
         neighbour = GetSquare(coordinates[0] - 1, coordinates[1] - 1);
