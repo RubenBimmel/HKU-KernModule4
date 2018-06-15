@@ -7,27 +7,31 @@ public class GameManager : NetworkBehaviour {
 
     public static GameManager instance;
 
-    public float maxTurnTime = 60f;
+    public float maxTurnTime = 30f;
+    public float maxSetupTime = 600f;
+    public Player winner;
 
     private int[] playerScores;
     private int turnCount;
     private float turnTimer;
+    private float maxTime;
 
 	// Use this for initialization
 	void Start () {
         instance = this;
         playerScores = new int[2];
         turnCount = 0;
-	}
+        maxTime = maxSetupTime;
+    }
 	
 	// Update is called once per frame
 	void Update () {
         if (isServer) {
             turnTimer += Time.deltaTime;
-            if (turnTimer > maxTurnTime - 5) {
+            if (turnTimer > maxTime - 5) {
                 RpcShowTimer();
             }
-            if (turnTimer > maxTurnTime) {
+            if (turnTimer > maxTime) {
                 RpcHideTimer();
                 RpcSetLocalPlayerState((int)Player.PlayerState.waiting);
                 turnTimer = float.MinValue;
@@ -49,7 +53,7 @@ public class GameManager : NetworkBehaviour {
     // Update score on clients
     [ClientRpc]
     private void RpcUpdateScores (int[] scores) {
-        Player.localPlayer.score = scores[Player.localPlayer.playerID];
+        PlayerPrefs.SetInt("score", scores[Player.localPlayer.playerID]);
         GameObject.Find("Score").GetComponent<TMPro.TextMeshPro>().text = scores[Player.localPlayer.playerID].ToString();
     }
 
@@ -68,7 +72,12 @@ public class GameManager : NetworkBehaviour {
     }
 
     // Called when a game is finished
-    public void GameOver (Player winner) {
+    public void GameOver (Player _winner) {
+        winner = _winner;
+    }
+
+    // Called at the end of the update when the game is finished
+    public void OnGameOver () {
         int winBonus = 2 * (100 - turnCount);
         playerScores[winner.playerID] += winBonus;
         RpcUpdateScores(playerScores);
@@ -105,16 +114,27 @@ public class GameManager : NetworkBehaviour {
 
     // Update all attacking pawns and prepare for next turn
     private void UpdateGameState () {
-        foreach (Square square in GameBoard.squares) {
-            if (square.pawns.Count == 2) {
-                Pawn.Attack(square.pawns[0], square.pawns[1]);
+        if (turnCount == 0) { 
+            // Setup stage
+            maxTime = maxTurnTime; // Max turn time changes in battle state
+        } else { 
+            // Battle stage
+            foreach (Square square in GameBoard.squares) {
+                if (square.pawns.Count == 2) {
+                    Pawn.Attack(square.pawns[0], square.pawns[1]);
+                }
+            }
+
+            if (winner) {
+                OnGameOver();
             }
         }
 
         turnCount++;
         turnTimer = 0;
-        maxTurnTime = 30f; // Max turn time changes in battle state
-        RpcSetLocalPlayerState((int)Player.PlayerState.battle);
+        if (!winner) {
+            RpcSetLocalPlayerState((int)Player.PlayerState.battle);
+        }
     }
 
     [ClientRpc]

@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 public class Square : MonoBehaviour {
 
 	public List<Pawn> pawns;
+    public bool canHavePawn;
     [HideInInspector]
 	public bool active;
 
@@ -50,37 +51,45 @@ public class Square : MonoBehaviour {
     // Called every frame
     private void Update() {
         if (Player.localPlayer) {
+            if (canHavePawn) {
                 switch (Player.localPlayer.state) {
-                case Player.PlayerState.waiting:
-                    active = false;
-                    break;
-                case Player.PlayerState.setup:
-                    active = false;
-                    break;
-                case Player.PlayerState.placingPawn:
-                    if (Player.localPlayer.playerID == 0) {
-                        active = pawns.Count == 0 && GameBoard.GetCoordinates(this)[1] < GameBoard.setupAreaSize;
-                    } else {
-                        active = pawns.Count == 0 && GameBoard.GetCoordinates(this)[1] >= GameBoard.GetSize()[1] - GameBoard.setupAreaSize;
-                    }
-                    break;
-                case Player.PlayerState.removingPawn:
-                    active = GetPlayerPawn();
-                    break;
-                case Player.PlayerState.battle:
-                    active = GetPlayerPawn();
-                    break;
-                case Player.PlayerState.movingPawn:
-                    if (!Pawn.selectedPawn) {
+                    case Player.PlayerState.waiting:
                         active = false;
-                    } else if (GetPlayerPawn()) {
+                        break;
+                    case Player.PlayerState.setup:
                         active = false;
-                    } else if (GameBoard.GetDistance(this, Pawn.selectedPawn.square) > Pawn.selectedPawn.moveDistance) {
-                        active = false;
-                    } else {
-                        active = true;
-                    }
-                    break;
+                        break;
+                    case Player.PlayerState.placingPawn:
+                        if (Player.localPlayer.playerID == 0) {
+                            active = pawns.Count == 0 && GameBoard.GetCoordinates(this)[1] < GameBoard.setupAreaSize;
+                        }
+                        else {
+                            active = pawns.Count == 0 && GameBoard.GetCoordinates(this)[1] >= GameBoard.GetSize()[1] - GameBoard.setupAreaSize;
+                        }
+                        break;
+                    case Player.PlayerState.removingPawn:
+                        active = GetPlayerPawn();
+                        break;
+                    case Player.PlayerState.battle:
+                        active = GetPlayerPawn();
+                        break;
+                    case Player.PlayerState.movingPawn:
+                        if (!Pawn.selectedPawn) {
+                            active = false;
+                        }
+                        else if (GetPlayerPawn()) {
+                            active = false;
+                        }
+                        else if (GameBoard.GetDistance(this, Pawn.selectedPawn.square) > Pawn.selectedPawn.moveDistance) {
+                            active = false;
+                        }
+                        else {
+                            active = true;
+                        }
+                        break;
+                }
+            } else {
+                active = false;
             }
             ApplyMaterial();
         }
@@ -88,7 +97,14 @@ public class Square : MonoBehaviour {
 
     // Updates the material for visual representation of the squares state, called every frame
     private void ApplyMaterial () {
-        if (Pawn.selectedPawn && Pawn.selectedPawn.square == this) {
+        if (Player.localPlayer.state == Player.PlayerState.waiting 
+            || Player.localPlayer.state == Player.PlayerState.updating 
+            || Player.localPlayer.state == Player.PlayerState.gameOver) {
+            shader.selected = false;
+            shader.targetEmission = 0;
+            shader.targetSaturation = 1;
+        }
+        else if (Pawn.selectedPawn && Pawn.selectedPawn.square == this) {
             shader.selected = true;
             shader.targetEmission = 0;
             shader.targetSaturation = 1;

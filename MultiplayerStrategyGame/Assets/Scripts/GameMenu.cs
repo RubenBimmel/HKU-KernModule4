@@ -11,8 +11,7 @@ public class GameMenu : MonoBehaviour {
     public GameObject MainUI;
     public GameObject GameOverUI;
 
-    public GameObject SetupCollider;
-    public GameObject PawnCollider;
+    public GameObject SetupCollider; //Collider to prevent player from pressing objects inside the scene when pressing on UI buttons
 
     private AutoLobbyManager alm;
 
@@ -21,21 +20,6 @@ public class GameMenu : MonoBehaviour {
     // Called on initialisation
     private void Start() {
         alm = (AutoLobbyManager)UnityEngine.Networking.NetworkManager.singleton;
-    }
-
-    // Called every frame
-    private void Update() {
-        UpdateColliders();
-    }
-
-    // Update colliders to prevent collision detection in scene while pressing on menu buttons
-    private void UpdateColliders() {
-        if (Player.localPlayer) {
-            PawnCollider.SetActive(Player.localPlayer.state == Player.PlayerState.placingPawn);
-            SetupCollider.SetActive(Player.localPlayer.state == Player.PlayerState.setup ||
-                Player.localPlayer.state == Player.PlayerState.placingPawn ||
-                Player.localPlayer.state == Player.PlayerState.movingPawn);
-        }
     }
 
     // Update player state
@@ -61,6 +45,7 @@ public class GameMenu : MonoBehaviour {
         }
 
         SetupUI.SetActive(false);
+        SetupCollider.SetActive(false);
         Player.localPlayer.CmdSetState(Player.PlayerState.waiting);
     }
 
@@ -81,42 +66,8 @@ public class GameMenu : MonoBehaviour {
         GameOverUI.transform.Find("EndScore").GetComponent<TMPro.TextMeshPro>().text = scores[Player.localPlayer.playerID].ToString();
     }
 
-    public void PostScore () {
-        StartCoroutine(PostPlayerScore(Player.localPlayer.score));
-    }
-
-    IEnumerator PostPlayerScore(int score) {
-        //First we create a form to add information to
-        WWWForm form = new WWWForm();
-        form.AddField("gameid", 6);
-        form.AddField("score", score);
-
-        //We're using Post by default, because we're always sending sessionID
-        string url = "http://studenthome.hku.nl/~ruben.bimmel/HKU/jaar2dev/Kernmodule4/database/posttosession.php";
-
-        //Pass the current session id if there is one active
-        if (session != null) {
-            url += "?sessionid=" + session;
-        }
-
-        //Post game data
-        UnityWebRequest www = UnityWebRequest.Post(url, form);
-
-        //This blocks
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError) {
-            Debug.Log(www.error);
-        }
-        else {
-            //Save session id
-            session = www.downloadHandler.text;
-
-            //Go to confirmation page
-            Application.OpenURL("http://studenthome.hku.nl/~ruben.bimmel/HKU/jaar2dev/Kernmodule4/database/confirmfromgame.php?sessionid=" + session);
-        }
-
-        yield return null;
+    public void Post () {
+        PostScore.GetInstance().Post();
     }
 
 }

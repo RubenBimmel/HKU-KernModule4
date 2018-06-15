@@ -8,8 +8,27 @@ using UnityEngine.SceneManagement;
 
 public class AutoLobbyManager : NetworkManager {
 
+    public float resetTime;
+
+    private bool searching;
+    private float timer;
+
+    // Called every frame
+    private void Update() {
+        // Stop lobby after reset time
+        if (searching) {
+            timer += Time.deltaTime;
+            if (timer > resetTime) {
+                StopLobby();
+            }
+        }
+    }
+
     //use this method to start match making
     public void StartLobby() {
+        timer = 0f;
+        searching = true;
+
         if (matchMaker == null) {
             StartMatchMaker();
         }
@@ -75,6 +94,7 @@ public class AutoLobbyManager : NetworkManager {
             NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
 
             if (CheckReadyToBegin()) {
+                searching = false;
                 StartGame();
             }
         }

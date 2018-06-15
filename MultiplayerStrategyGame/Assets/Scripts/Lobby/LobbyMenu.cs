@@ -5,12 +5,24 @@ using UnityEngine.Networking;
 
 public class LobbyMenu : MonoBehaviour {
 
+    public GameObject uploadButton;
+
     private AutoLobbyManager alm;
     private Player.PlayerColor color;
 
     // Called on initialisation
     public void Start() {
         alm = (AutoLobbyManager)NetworkManager.singleton;
+
+        // Remove score data if it is 0
+        if (PlayerPrefs.HasKey("score")) {
+            if (PlayerPrefs.GetInt("score") == 0) {
+                PlayerPrefs.DeleteKey("score");
+            }
+        }
+
+        // Display upload button if there is a score from last game
+        uploadButton.SetActive(PlayerPrefs.HasKey("score"));
     }
 
     // Called before destroy
@@ -41,4 +53,9 @@ public class LobbyMenu : MonoBehaviour {
 	public void QuitGame () {
 		Application.Quit();
 	}
+
+    // Post HighScore
+    public void Post() {
+        PostScore.GetInstance().Post();
+    }
 }

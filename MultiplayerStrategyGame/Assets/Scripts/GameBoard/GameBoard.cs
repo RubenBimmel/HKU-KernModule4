@@ -18,13 +18,18 @@ public class GameBoard : MonoBehaviour {
         // initialise the board
         squares = new Square[width * length];
         size = new int[] { width, length };
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < length; y++) {
-                    squares[x + y * width] = Instantiate(Resources.Load<Square>("Prefabs/Square"), transform);
-                    squares[x + y * width].transform.localPosition = new Vector3(x + .5f, 0, y + .5f);
-                    squares[x + y * width].name = "Square (" + x + ", " + y + ")";
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < length; y++) {
+                squares[x + y * width] = Instantiate(Resources.Load<Square>("Prefabs/Square"), transform);
+                squares[x + y * width].transform.localPosition = new Vector3(x + .5f, 0, y + .5f);
+                squares[x + y * width].name = "Square (" + x + ", " + y + ")";
+                bool active = true;
+                if ((y == 4 || y == 5) && (x == 2 || x == 3 || x == 6 || x == 7)) {
+                    active = false;
                 }
+                squares[x + y * width].canHavePawn = active;
             }
+        }
 	}
 
 	// Draw board outline so that it is visible inside the editor
