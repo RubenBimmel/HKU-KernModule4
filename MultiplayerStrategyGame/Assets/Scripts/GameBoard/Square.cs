@@ -12,7 +12,6 @@ public class Square : MonoBehaviour {
 
 	private bool mouseOver;
     private SquareShader shader;
-	//private MeshRenderer meshRenderer;
 
 	private void Awake() {
         shader = GetComponent<SquareShader> ();

@@ -27,19 +27,21 @@ public class Player : NetworkBehaviour {
         gameOver
     }
 
+    // Player identification
     public static Player localPlayer;
     public static List<Player> ActivePlayers = new List<Player>();
     public int playerID { get { return ActivePlayers.IndexOf(this); } }
+
+    // Check if player has spawned all pawns
     public bool spawnAllPawns { get { return spawnedPawns.Count == 30; } }
 
-    //[HideInInspector]
-    //public int score;
-
+    // Camera variables
     private Transform cam;
     private int movementScreenBorderSize = 20;
     private float movementExtents = 5f;
     private float moveSpeed = 8f;
 
+    // List of pawns
     private List<Pawn> spawnedPawns;
     private List<Pawn> movedPawns;
 
@@ -49,7 +51,7 @@ public class Player : NetworkBehaviour {
     public PlayerState state;
 
     // Called on initialisation
-    public void Start() {
+    private void Start() {
         ActivePlayers.Add(this);
         SceneManager.sceneLoaded += SetLevelState;
 
@@ -63,7 +65,7 @@ public class Player : NetworkBehaviour {
     }
 
     // Called every frame
-    public void Update() {
+    private void Update() {
         if (isLocalPlayer) {
             if (state != PlayerState.lobbying) {
                 UpdateInput();
@@ -72,7 +74,7 @@ public class Player : NetworkBehaviour {
     }
 
     // Called before being destroyed
-    public void OnDestroy() {
+    private void OnDestroy() {
         ActivePlayers.Remove(this);
         SceneManager.sceneLoaded -= SetLevelState;
 

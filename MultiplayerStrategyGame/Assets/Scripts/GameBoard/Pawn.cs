@@ -25,8 +25,8 @@ public class Pawn : NetworkBehaviour {
     public Square targetSquare;
 
 
-// Initialise pawns team and position
-[ClientRpc]
+    // Initialise pawns team and position
+    [ClientRpc]
     public void RpcInitialise (int playerID, int squareIndex) {
         team = playerID;
         foreach (MeshRenderer mesh in GetComponentsInChildren<MeshRenderer>()) {
